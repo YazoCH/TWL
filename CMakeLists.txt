@@ -20,6 +20,7 @@ add_executable(main
     src/Bob.cpp
     src/Thomas.cpp
     src/Level.cpp
+    src/SoundManager.cpp
 )
 add_custom_command(TARGET main PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
