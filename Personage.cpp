@@ -16,6 +16,7 @@ void Personage::spawn(sf::Vector2f startPos, float verticalSpeed) {
 	right.setFillColor(sf::Color::Magenta);
 
 	sprite.setPosition(startPos);
+	position = startPos;
 
 	speedVertical = verticalSpeed;
 }
@@ -41,7 +42,7 @@ void Personage::update(const float dt) {
 	if (falling) position.y += speedVertical * dt;
 
 	sf::FloatRect bounds = sprite.getGlobalBounds();
-	head.setPosition(bounds.position);//Левый верхний угол спрайта
+	head.setPosition(sf::Vector2f(bounds.position.x, bounds.position.y + bounds.size.y*.3f));//Левый верхний угол спрайта
 	sf::Vector2f size(bounds.size.x, 1);
 	head.setSize(size);
 

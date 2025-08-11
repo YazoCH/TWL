@@ -16,22 +16,25 @@ void Level::readLevelFile(sf::VertexArray &textureZone, std::vector<std::vector<
 		m_StartPosition.y = 100;
 		break;
 	case 1:
-		levelPath = "resources\\level\\level2.txt";
+		levelPath = "resources/level/level2.txt";
 		m_StartPosition.x = 100;
 		m_StartPosition.y = 3600;
 		break;
 	case 2:
-		levelPath = "resources\\level\\level3.txt";
+		levelPath = "resources/level/level3.txt";
 		m_StartPosition.x = 1250;
 		m_StartPosition.y = 0;
 		break;
 	case 3:
-		levelPath = "resources\\level\\level4.txt";
-		m_StartPosition.x = 50;
-		m_StartPosition.y = 200;
+		levelPath = "resources/level/level4.txt";
+		m_StartPosition.x = 100;//50
+		m_StartPosition.y = 100;//200
 		break;
 
 	}
+	
+	std::cout << levelNum << '\n';
+
 	std::ifstream file(levelPath);
 
 	if (!file.is_open()) {
@@ -105,6 +108,11 @@ void Level::readLevelFile(sf::VertexArray &textureZone, std::vector<std::vector<
 		}
 	}
 	
+
+	levelNum++;
+	if (levelNum > 3) {
+		levelNum = 0;
+	}
 	//for (unsigned int i = 0; i < height; ++i) {
 	//	for (unsigned int j = 0; j < width; ++j) {
 	//		// get a pointer to the triangles' vertices of the current tile
@@ -114,6 +122,7 @@ void Level::readLevelFile(sf::VertexArray &textureZone, std::vector<std::vector<
 	//	}
 	//	std::cout << '\n';
 	//}
+
 }
 
 Level::~Level()

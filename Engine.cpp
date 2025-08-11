@@ -106,14 +106,65 @@ void Engine::input() {
 void Engine::update(sf::Time dt) {
     if (playing)
     {
-        //timeLevel -= dt.asSeconds();
-        if (0 == timeLevel) {
+        timeLevel -= dt.asSeconds();
+        //std::cout << timeLevel << '\n';
+        if (timeLevel <= 0) {
+            std::cout << "the time is over\n";
             isNewLevel = true;
+        }
+        //Координаты игроков меняются, а камера остаётся на одном месте
+        //(не фокусируемся на игроках)
+        Bob.update(dt.asSeconds());
+        Thomas.update(dt.asSeconds());
+        //Если оба достигли конца уровня - загрузка нового уровня
+        //Иначе - остановить падение, прыжок и т.д.
+        if (detectCollsion(Bob) && detectCollsion(Thomas)) {
+            isNewLevel = true;
+        }
+        else {
+            //
+            detectCollsion(Thomas);
+        }
+        
+        //???
+        sf::FloatRect BobFootBox = Bob.getFoots().getGlobalBounds();
+        sf::FloatRect BobHeadBox = Bob.getHead().getGlobalBounds();
+        sf::FloatRect ThomasFootBox = Thomas.getFoots().getGlobalBounds();
+        sf::FloatRect ThomasHeadBox = Thomas.getHead().getGlobalBounds();
+
+        if (BobFootBox.findIntersection(ThomasHeadBox)) {//Не запрыгивает
+            Bob.stopFalling(ThomasHeadBox.position.y);
+        }
+        if (ThomasFootBox.findIntersection(BobHeadBox)) {
+            Thomas.stopFalling(BobHeadBox.position.y);
+        }
+
+
+        if (isSplitScreen) {
+            m_LeftView.setCenter(Thomas.getCenter());
+            m_RightView.setCenter(Bob.getCenter());
+        }
+        else {
+            if (isCharacter1) {
+                m_MainView.setCenter(Thomas.getCenter());
+
+            }
+            else {
+                m_MainView.setCenter(Bob.getCenter());
+
+            }
         }
     }
     if (isNewLevel) {
         try
         {
+            playing = false;
+            for (size_t i = 0; i < levelMatrix.size(); i++) {
+                levelMatrix[i].clear();
+            }
+            levelMatrix.clear();
+
+            timeLevel = 10 * 0.9;
             level.readLevelFile(textureZone, levelMatrix);
             //std::cout << levelMatrix[0].size() << '\n';
             //for (int x = 0; x < levelMatrix.size(); x++) {
@@ -136,48 +187,11 @@ void Engine::update(sf::Time dt) {
 
     }
 
-    //Координаты игроков меняются, а камера остаётся на одном месте
-    //(не фокусируемся на игроках)
-    Bob.update(dt.asSeconds());
-    Thomas.update(dt.asSeconds());
-    //Если оба достигли конца уровня - загрузка нового уровня
-    //Иначе - остановить падение, прыжок и т.д.
-    if (detectCollsion(Bob) && detectCollsion(Thomas)) {
-        isNewLevel = true;
-    }
-    else {
-        //
-        detectCollsion(Thomas);
-    }
-
-    sf::FloatRect BobFootBox = Bob.getFoots().getGlobalBounds();
-    sf::FloatRect BobHeadBox = Bob.getHead().getGlobalBounds();
-    sf::FloatRect ThomasFootBox = Thomas.getFoots().getGlobalBounds();
-    sf::FloatRect ThomasHeadBox = Thomas.getHead().getGlobalBounds();
-
-    if (BobFootBox.findIntersection(ThomasHeadBox)) {
-        Bob.stopFalling(ThomasHeadBox.position.y);
-    }
-    if (ThomasFootBox.findIntersection(BobHeadBox)) {
-        Thomas.stopFalling(BobHeadBox.position.y);
-    }
+   
 
 
 
-    if (isSplitScreen) {
-        m_LeftView.setCenter(Thomas.getCenter());
-        m_RightView.setCenter(Bob.getCenter());
-    }
-    else {
-        if (isCharacter1) {
-            m_MainView.setCenter(Thomas.getCenter());
-
-        }
-        else {
-            m_MainView.setCenter(Bob.getCenter());
-
-        }
-    }
+    
 }
 
 void Engine::draw() {
@@ -243,8 +257,8 @@ bool Engine::detectCollsion(Personage &p_personage) {
     sf::FloatRect playerBounds = p_personage.getPos();
     int startX = playerBounds.position.x/TILE_SIZE.x - 1;
     int startY = playerBounds.position.y / TILE_SIZE.y - 1;
-    int endX = (playerBounds.size.x / TILE_SIZE.x) + startX + 2;
-    int endY = (playerBounds.size.y / TILE_SIZE.y) + startY + 3;
+    int endX = (playerBounds.size.x / TILE_SIZE.x + 1) + startX + 1;
+    int endY = (playerBounds.size.y / TILE_SIZE.y + 1) + startY + 1;
 
     if (startX < 0) {
         startX = 0;
@@ -276,12 +290,12 @@ bool Engine::detectCollsion(Personage &p_personage) {
         for (int y = startY; y < endY; y++) {
             block.position.x = x * TILE_SIZE.x;
             block.position.y = y * TILE_SIZE.y;
-            std::cout << x * TILE_SIZE.x << ' ' << y * TILE_SIZE.y << '\n' << block.size.x << ' ' << block.size.y << "\n\n";
-            std::cout << "Cell 0: " << (int)levelMatrix[y][x] << "\n";
+            //std::cout << x * TILE_SIZE.x << ' ' << y * TILE_SIZE.y << '\n' << block.size.x << ' ' << block.size.y << "\n\n";
+            //std::cout << "Cell 0: " << (int)levelMatrix[y][x] << "\n";
 
             //Поиск пересечения блока с головой, ногами, справа, слева, если клетка = 1,2,3,4
             if (levelMatrix[y][x] == 1) {
-                std::cout << "Cell 1: " << (int)levelMatrix[y][x] << "\n";
+                //std::cout << "Cell 1: " << (int)levelMatrix[y][x] << "\n";
                 //Обычная клетка
 
                 sf::FloatRect leftBox = p_personage.getLeft().getGlobalBounds();;
@@ -303,7 +317,7 @@ bool Engine::detectCollsion(Personage &p_personage) {
                 if (feetBox.findIntersection(block)) {
                     p_personage.stopFalling(block.position.y);
                     std::cout << "stop falling\n";
-                    getchar();
+                    //getchar();
                 }
                 if (headBox.findIntersection(block)) {
                     p_personage.stopJump();
@@ -312,11 +326,11 @@ bool Engine::detectCollsion(Personage &p_personage) {
             }
             else if (levelMatrix[y][x] == 2 || levelMatrix[y][x] == 3) {
                 if (levelMatrix[y][x] == 2) {
-                    std::cout << (int)levelMatrix[y][x] << " 2\n";
+                    //std::cout << (int)levelMatrix[y][x] << " 2\n";
                     //Сгорел
                 }
                 else {
-                    std::cout << (int)levelMatrix[y][x] << " 3\n";
+                    //std::cout << (int)levelMatrix[y][x] << " 3\n";
                     //Утонул
                 }
                 p_personage.spawn(level.getStartPosition(), VERTICAL_SPEED);

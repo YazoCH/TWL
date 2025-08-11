@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "TextureHolder.h"
+#include "SoundManager.h"
 #include "Level.h"
 
 #include "Personage.h"//
@@ -21,6 +22,7 @@ private:
     sf::Texture bgTexture;
 
     TextureHolder textureHolder;
+    SoundManager soundManager;
     //Когда играем двумя игроками, один управляется через WASD, а другой стрелочками
     //Разделение по кнопке (e) 
     bool isCharacter1 = true;
@@ -39,6 +41,7 @@ private:
 
     sf::View HUDview;//Координаты и размеры
 
+    //Нужна ли информация о уровне?
     float timeLevel = 10;
     bool isNewLevel = true;
 

@@ -24,7 +24,7 @@ private:
 
 	//sf::VertexArray textureZone;
 
-	int levelNum = 0;
+	int levelNum = 3;
 
 	sf::Vector2u tileSetSize = { 50, 250 };
 	sf::Vector2u tileSize = { 50, 50 };
